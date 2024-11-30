@@ -102,6 +102,8 @@ namespace TaktieUtils
         }
         private void UpdateIcon()
         {
+            if (selectedDevice == null) return;
+
             if (selectedDevice.AudioEndpointVolume.Mute) {
                 notifyIcon.Icon = new Icon(@"data/mute.ico");
             } else {
@@ -128,6 +130,7 @@ namespace TaktieUtils
         private void InitializeAudioDeviceCombobox()
         {
             comboBox_AudioDevices.Items.Clear();
+            comboBox_AudioDevices.Items.Add("");
 
             // コンボボックスにデバイスを追加
             var inputDevices = deviceEnum.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
@@ -137,10 +140,8 @@ namespace TaktieUtils
         }
         private void ToggleMute()
         {
-            if (selectedDevice == null) {
-                MessageBox.Show("デバイスが選択されていません。");
-                return;
-            }
+            if (selectedDevice == null) return;
+
             if (selectedDevice.AudioEndpointVolume.Mute) {
                 selectedDevice.AudioEndpointVolume.Mute = false;
                 PlaySound("data/unmute.wav");
@@ -152,7 +153,11 @@ namespace TaktieUtils
         }
         private void comboBox_AudioDevices_SelectedIndexChanged(object sender, EventArgs e)
         {
-            selectedDevice = comboBox_AudioDevices.SelectedItem as MMDevice;
+            if (comboBox_AudioDevices.SelectedItem.ToString() == "") {
+                selectedDevice = null;
+            } else {
+                selectedDevice = comboBox_AudioDevices.SelectedItem as MMDevice;
+            }
             UpdateIcon();
         }
         private void button1_Click(object sender, EventArgs e)
@@ -331,19 +336,29 @@ namespace TaktieUtils
         private void LoadConfig()
         {
             var config = YamlClass.LoadYaml("config.yml");
-            if (config == null) return;
+            if (config == null) {
+                comboBox_AudioDevices.SelectedIndex = 0;
+                return;
+            }
 
             checkBox_MuteKeyBind.Checked = config.enableMuteKeyBind;
 
             // comboBox_AudioDevicesを設定
+            bool flag = false;
             int i = 0;
-            foreach (MMDevice device in comboBox_AudioDevices.Items)
-            {
+            foreach (var device in comboBox_AudioDevices.Items) {
+                if (device is MMDevice == false) continue;
+
                 if (device.ToString() == config.audioDevice) {
-                    comboBox_AudioDevices.SelectedIndex = i;
-                    selectedDevice = device;
+                    comboBox_AudioDevices.SelectedIndex = i + 1; // +1 は、「選択なし」を飛ばすため
+                    selectedDevice = (MMDevice)device;
+                    flag = true;
                 }
                 i++;
+            }
+            // config.ymlに書いてあるデバイスが有効になっていない場合、初期化
+            if (!flag) {
+                comboBox_AudioDevices.SelectedIndex = 0;
             }
 
             // comboBox_KeyBindを設定
@@ -358,10 +373,14 @@ namespace TaktieUtils
         }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            string deviceName = "";
+            if (selectedDevice != null) {
+                deviceName = selectedDevice.ToString();
+            }
             ConfigClass config = new ConfigClass
             {
                 enableMuteKeyBind = checkBox_MuteKeyBind.Checked,
-                audioDevice = selectedDevice.ToString(),
+                audioDevice = deviceName,
                 keyBind1 = comboBox_KeyBind1.SelectedIndex,
                 keyBind2 = comboBox_KeyBind2.SelectedIndex,
                 enableAfkPowerSaving = checkBox_AfkPowerSaving.Checked,
