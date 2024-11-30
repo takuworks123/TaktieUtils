@@ -62,7 +62,8 @@ namespace TaktieUtils
             notifyIcon.Visible = true;
             // アイコンにマウスポインタを合わせたときのテキスト
             notifyIcon.Text = "TaktieUtils - ダブルクリックで表示";
-            
+
+            notifyIcon.Icon = new Icon(@"data/unmute.ico");
             UpdateIcon();
 
             // コンテキストメニュー
