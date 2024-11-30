@@ -131,13 +131,9 @@ namespace TaktieUtils
 
             // コンボボックスにデバイスを追加
             var inputDevices = deviceEnum.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
-            foreach (var device in inputDevices)
-            {
+            foreach (var device in inputDevices) {
                 comboBox_AudioDevices.Items.Add(device);
             }
-
-            // 最初のデバイスを選択
-            comboBox_AudioDevices.SelectedIndex = 0;
         }
         private void ToggleMute()
         {
@@ -343,8 +339,7 @@ namespace TaktieUtils
             int i = 0;
             foreach (MMDevice device in comboBox_AudioDevices.Items)
             {
-                if (device.ToString() == config.audioDevice)
-                {
+                if (device.ToString() == config.audioDevice) {
                     comboBox_AudioDevices.SelectedIndex = i;
                     selectedDevice = device;
                 }
