@@ -246,7 +246,8 @@ namespace TaktieUtils
             if (keyBind1.key != System.Windows.Forms.Keys.None && keyBind2.key != System.Windows.Forms.Keys.None) {
                 if (IsKeyPushing(keyBind1.key) && IsKeyPushing(keyBind2.key)) flag = true;
             } else {
-                if (IsKeyPushing(keyBind1.key) || IsKeyPushing(keyBind2.key)) flag = true;
+                if (keyBind1.key != System.Windows.Forms.Keys.None && IsKeyPushing(keyBind1.key)) flag = true;
+                else if(keyBind2.key != System.Windows.Forms.Keys.None && IsKeyPushing(keyBind2.key)) flag = true;
             }
 
             if (flag) {
